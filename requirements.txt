@@ -1,9 +1,10 @@
 #.venv/bin/python -m pip install -r requirements.txt
 
-openai #https://platform.openai.com/docs/api-reference/chat/create
-llama-index #https://pypi.org/project/llama-index/
-transformers #https://huggingface.co/docs/transformers/en/index
-instructor #https://github.com/instructor-ai/instructor
-prettyprint
-langchain[openai] #https://python.langchain.com/docs/introduction/
+llama-index
+faiss-cpu
+sentence-transformers
+requests
+python-dotenv
 
+llama-index-embeddings-huggingface
+llama-index-vector-stores-faiss 
