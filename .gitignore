@@ -1,0 +1,5 @@
+/.env
+/.venv
+/.webui_secret_key
+/Kopie_von_RevLit_Part2_RAG_LLM.ipynb
+/RAG.ipynb
