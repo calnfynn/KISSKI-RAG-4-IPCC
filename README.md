@@ -1,28 +1,18 @@
-# RAG for Climate Literature
+# KISSKI RAG 4 IPCC
 
-## Tools
+**RAG pipeline for climate literature** using open models (Llama 3), local embeddings (FAISS), and semantic HTML chunking. Built as part of my BA thesis.
 
-### **OpenAI Client Setup**
-- recommended by KISSKI
+## Usage
 
-### **Llama_index**
-- not sure I'll keep using this, I might switch to LangChain (I haven't tried that yet)
+Make sure you have:
+- a compatible Python environment (Python 3.10+ recommended)
+- access to the KISSKI API (or replace it with a local Llama3 endpoint)
+- your input files stored in the correct directory structure
 
-### **SentenceSplitter**
-- splits semantically &rarr; has better chances of keeping paragraphs intact *BUT* I don't think this works with the HTML since it's looking for `\n\n` to indicate a paragraph break
-- comes with Llama_index
+## License
 
-### **FAISS Vector**
-- FOSS
-- comes with Llama_index
+This code is licensed for **noncommercial use only**.  
+You may use, share, and adapt it freely for research, academic, or personal projects.  
+**Commercial use is strictly prohibited without written permission.**
 
-### **HuggingFaceEmbedding**
-- local
-- FOSS
-- comes with Llama_index
-
-## To Do
-
-- [ ] check if there already is a vector
-- [ ] find a splitter that works with HTML syntax
-- [ ] change prompt for LLM
+See [LICENSE](./LICENSE) for full terms.
