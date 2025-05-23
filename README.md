@@ -4,7 +4,7 @@
 
 ## Usage
 
-See `notes.md`.
+See notebook header.
 
 Make sure you have:
 - a compatible Python environment (Python 3.10+ recommended)
