@@ -52,7 +52,7 @@
 
 - [x] check if there already is a vector
 - [x] find a splitter that works with HTML syntax or change settings for the one I have
-- [ ] change prompt for LLM
+- [x] change prompt for LLM
 - [ ] embedding works, but seems slow &rarr; try some other tools
 
 ### next
