@@ -26,7 +26,7 @@ class Model(Enum):
     LLAMA = 'meta-llama-3.1-8b-instruct'
     #MISTRAL = 'mistral-large-instruct-2407'
     GEMMA = 'gemma-3-27b-it'
-
+    
 class Embedding(Enum):
     MINILM = "sentence-transformers/all-MiniLM-L6-v2"
     GTR = "sentence-transformers/gtr-t5-base"
