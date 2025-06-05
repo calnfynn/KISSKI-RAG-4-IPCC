@@ -13,8 +13,6 @@ from dotenv import load_dotenv
 # Enums and variables
 #####
 
-#topic = "climate change and its effects on islands"
-# You are an expert on the topic of {topic}. 
 
 ID_prompt = "Pass back the ID of the paragraph(s) you're taking the information from."
 
@@ -45,8 +43,8 @@ parser.add_argument("--prompt", type=str, default="BASIC", choices=[m.name for m
 parser.add_argument("--embed_model", type=str, default="MINILM", choices=[m.name for m in Embedding], help="Which HuggingFace embedding model to use (default: MINILM)")
 parser.add_argument("--input_dir", type=str, default="html", help="Input directory for documents (default: ./html)")
 parser.add_argument("--index_dir", type=str, default="./faiss_index", help="Directory for storing/loading the index (default: ./faiss_index)")
-parser.add_argument("--tokens_per_chunk", type=int, default=1024, help="Tokens per chunk for splitting (default: 1024)")
-parser.add_argument("--chunk_overlap", type=int, default=200, help="Token overlap between chunks (default: 200)")
+parser.add_argument("--tokens", type=int, default=1024, help="Tokens per chunk for splitting (default: 1024)")
+parser.add_argument("--overlap", type=int, default=200, help="Token overlap between chunks (default: 200)")
 
 args = parser.parse_args()
 
@@ -57,8 +55,8 @@ vector_dimensions = EMBED_DIM_MAP[embed_model]
 
 index_dir = args.index_dir
 input_dir = args.input_dir
-tokens_per_chunk = args.tokens_per_chunk
-chunk_overlap = args.chunk_overlap
+tokens_per_chunk = args.tokens
+chunk_overlap = args.overlap
 
 
 #####
@@ -81,14 +79,14 @@ def make_index(index_dir, embed_model):
 
   # Embed Chunks with HuggingFace
 
-  embed_model = HuggingFaceEmbedding(model_name=embed_model)
+  embedder = HuggingFaceEmbedding(model_name=embed_model)
 
   if os.path.exists(index_dir) and os.listdir(index_dir):
     vector_store = FaissVectorStore.from_persist_dir(index_dir)
     storage_context = StorageContext.from_defaults(
         vector_store=vector_store, persist_dir=index_dir
     )
-    index = load_index_from_storage(storage_context=storage_context, embed_model=embed_model)
+    index = load_index_from_storage(storage_context=storage_context, embed_model=embedder)
     print("Using stored index.")
     
   else:
@@ -99,7 +97,7 @@ def make_index(index_dir, embed_model):
 
     index = VectorStoreIndex(
         nodes,
-        embed_model=embed_model,
+        embed_model=embedder,
         storage_context=storage_context,
     )
 
