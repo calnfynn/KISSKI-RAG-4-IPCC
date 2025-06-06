@@ -1,6 +1,6 @@
 # RAG for Climate Literature
 
-## What's happening? 
+## What's happening?
 
 1. Load HTML file with SimpleDirectoryReader
 2. Semantically-ish chunk HTML with SentenceSplitter
@@ -20,7 +20,7 @@
 ### Llama 3
 
 - more open than other models
-- good documentation 
+- good documentation
 - easy to run locally if someone wants to re-use the code without an API
 
 ### **OpenAI Client Setup**
@@ -30,9 +30,9 @@
 ### **Llama_index**
 
 - ~~not sure I'll keep using this, I might switch to LangChain (I haven't tried that yet)~~
-- thoughts: 
+- thoughts:
   - llama_index seems to be better suited for RAG
-  - not as many general LLM features as LangChain but the RAG specific ones seem to be easier to set up 
+  - not as many general LLM features as LangChain but the RAG specific ones seem to be easier to set up
   - has everything I want for RAG, no need to make this more complicated (so far?)
 
 ### **SentenceSplitter**
@@ -48,7 +48,7 @@
 
 ## To Do
 
-### right now 
+### right now
 
 - [x] check if there already is a vector
 - [x] find a splitter that works with HTML syntax or change settings for the one I have
@@ -59,6 +59,6 @@
 
 #### evaluation
 
-  - [ ] look up if llama_index has any RAG evaluation tools
-  - [ ] look for external tools
-    - RAGAS?
+- [ ] look up if llama_index has any RAG evaluation tools
+- [ ] look for external tools
+  - RAGAS?

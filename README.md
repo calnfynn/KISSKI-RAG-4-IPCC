@@ -7,6 +7,7 @@
 See notebook header.
 
 Make sure you have:
+
 - a compatible Python environment (Python 3.10+ recommended)
 - access to the KISSKI API (or replace it with a local Llama3 endpoint)
 - your input files stored in the correct directory structure

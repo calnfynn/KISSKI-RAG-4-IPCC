@@ -8,3 +8,5 @@ python-dotenv
 
 llama-index-embeddings-huggingface
 llama-index-vector-stores-faiss 
+
+alive-progress

@@ -8,13 +8,15 @@ from llama_index.core.node_parser import SentenceSplitter
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from openai import OpenAI
 from dotenv import load_dotenv
+from alive_progress import alive_bar
+
 
 #####
 # Enums and variables
 #####
 
 
-ID_prompt = "Pass back the ID of the paragraph(s) you're taking the information from."
+ID_prompt = "If you're taking information from the text to answer a question, pass back the ID of the paragraph(s) you're taking the information from."
 
 class Prompt(Enum):
     BASIC = f'{ID_prompt} You are explaining to someone with basic knowledge of the topic.'
@@ -22,7 +24,7 @@ class Prompt(Enum):
 
 class Model(Enum):
     LLAMA = 'meta-llama-3.1-8b-instruct'
-    #MISTRAL = 'mistral-large-instruct-2407'
+    #MISTRAL = 'mistral-large-instruct'
     GEMMA = 'gemma-3-27b-it'
     
 class Embedding(Enum):
@@ -45,6 +47,8 @@ parser.add_argument("--input_dir", type=str, default="html", help="Input directo
 parser.add_argument("--index_dir", type=str, default="./faiss_index", help="Directory for storing/loading the index (default: ./faiss_index)")
 parser.add_argument("--tokens", type=int, default=1024, help="Tokens per chunk for splitting (default: 1024)")
 parser.add_argument("--overlap", type=int, default=200, help="Token overlap between chunks (default: 200)")
+parser.add_argument("--rebuild", action="store_true", help="Force rebuilding the FAISS index even if one exists")
+
 
 args = parser.parse_args()
 
@@ -57,55 +61,75 @@ index_dir = args.index_dir
 input_dir = args.input_dir
 tokens_per_chunk = args.tokens
 chunk_overlap = args.overlap
+force_rebuild = args.rebuild
+
+bar_style = "fishes"
 
 
 #####
 # Load, chunk, and embed HTML
 #####
 
-def make_index(index_dir, embed_model):
-  
-  # Load HTML file(s)
-  documents = SimpleDirectoryReader(input_dir=input_dir).load_data()
-  print(f"Loaded {len(documents)} document(s).")
 
-  # Chunk with SentenceSplitter
-  splitter = SentenceSplitter(chunk_size=tokens_per_chunk, chunk_overlap=chunk_overlap) 
-  # 1 token = 4 characters
-  nodes = splitter.get_nodes_from_documents(documents)
+def make_index(index_dir, embed_model, force_rebuild):
 
-  print(f"Generated {len(nodes)} chunks.") 
+    # Embed Chunks with HuggingFace
+    embedder = HuggingFaceEmbedding(model_name=embed_model)
 
-
-  # Embed Chunks with HuggingFace
-
-  embedder = HuggingFaceEmbedding(model_name=embed_model)
-
-  if os.path.exists(index_dir) and os.listdir(index_dir):
     vector_store = FaissVectorStore.from_persist_dir(index_dir)
-    storage_context = StorageContext.from_defaults(
-        vector_store=vector_store, persist_dir=index_dir
-    )
-    index = load_index_from_storage(storage_context=storage_context, embed_model=embedder)
-    print("Using stored index.")
-    
-  else:
-    # Create Index
-    faiss_index = faiss.IndexFlatL2(vector_dimensions)
-    vector_store = FaissVectorStore(faiss_index=faiss_index)
-    storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
-    index = VectorStoreIndex(
-        nodes,
-        embed_model=embedder,
-        storage_context=storage_context,
-    )
+    faiss_index = vector_store._faiss_index
+    stored_dim = faiss_index.d
 
-    # Save index
-    index.storage_context.persist(persist_dir=index_dir)
-    print(f"Index stored in {index_dir}")
+    #if:
+    # - not instructed to rebuild index
+    # - stored index fits the dimensions required by embedding model
+    # - index directory exists
+    # - index directory isn't empty
+    if (not force_rebuild) and (stored_dim == vector_dimensions) and os.path.exists(index_dir) and os.listdir(index_dir):
 
-  return index
+        storage_context = StorageContext.from_defaults(
+            vector_store=vector_store, persist_dir=index_dir
+        )
+        index = load_index_from_storage(storage_context=storage_context, embed_model=embedder)
+        print("Using stored index.")
+
+    else:
+
+        # Load HTML file(s)
+        documents = SimpleDirectoryReader(input_dir=input_dir).load_data()
+        print(f"Loaded {len(documents)} document(s).")
+
+        # Chunk with SentenceSplitter (progress bar per doc)
+        splitter = SentenceSplitter(chunk_size=tokens_per_chunk, chunk_overlap=chunk_overlap)
+
+        nodes = []
+        with alive_bar(title="Generating chunks...", unknown=bar_style, spinner=None) as bar:
+            for doc in documents:
+                nodes.extend(splitter.get_nodes_from_documents([doc]))
+                bar()
+
+        print(f"Generated {len(nodes)} chunks.")
+
+        # Create Index
+        faiss_index = faiss.IndexFlatL2(vector_dimensions)
+        vector_store = FaissVectorStore(faiss_index=faiss_index)
+        storage_context = StorageContext.from_defaults(vector_store=vector_store)
+
+        with alive_bar(title="Creating index...", unknown=bar_style, spinner=None) as bar:
+            index = VectorStoreIndex(
+                nodes,
+                embed_model=embedder,
+                storage_context=storage_context,
+            )
+            bar()
+
+
+        # Save index
+        index.storage_context.persist(persist_dir=index_dir)
+        print(f"Index stored in {index_dir}")
+
+    return index
 
 #####
 # LLM
@@ -143,7 +167,8 @@ def load_llm(llm_model, answer_level):
 
 def ask_question(index, ask_openai_llm):
   while True:
-      query = input("Enter your question (or type 'q' to quit): ").strip()
+      #\033[1m + \033[0m for bold text
+      query = input("\033[1m" + "Enter your question (or type 'q' to quit): " + "\033[0m").strip()
       if query.lower() == 'q':
           print("Session ended.")
           break
@@ -170,6 +195,6 @@ def ask_question(index, ask_openai_llm):
 
 if __name__ == "__main__":
 
-    index = make_index(index_dir, embed_model.value)
+    index = make_index(index_dir, embed_model.value, force_rebuild)
     ask_openai_llm = load_llm(llm_model.value, answer_level.value)
     ask_question(index, ask_openai_llm)
