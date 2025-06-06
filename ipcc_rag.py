@@ -1,3 +1,24 @@
+"""
+KISSKI RAG 4 IPCC — Copyright (c) 2025 ASKC Rahr
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the “Software”), to use,
+copy, modify, merge, and distribute the Software **for noncommercial purposes only**, 
+subject to the following conditions:
+
+1. **Attribution** must be retained in all copies or substantial portions of the Software.
+2. Commercial use of any kind is **explicitly forbidden** without prior written permission.
+   This includes, but is not limited to:
+   - use in or by for-profit companies
+   - integration into commercial services or products
+   - use by contractors or consultants for paid work
+
+The Software is provided "as is", without warranty of any kind.
+
+This license is derived from the MIT License with added restrictions to prohibit commercial use.
+"""
+
+
 from enum import Enum
 import argparse
 import faiss
@@ -16,7 +37,9 @@ from alive_progress import alive_bar
 #####
 
 
-ID_prompt = "If you're taking information from the text to answer a question, pass back the ID of the paragraph(s) you're taking the information from."
+ID_prompt = """
+If you're taking information from the text to answer a question, pass back the ID of the paragraph(s) you're taking the information from in the form of a hyperlink.
+"""
 
 class Prompt(Enum):
     BASIC = f'{ID_prompt} You are explaining to someone with basic knowledge of the topic.'
@@ -24,7 +47,6 @@ class Prompt(Enum):
 
 class Model(Enum):
     LLAMA = 'meta-llama-3.1-8b-instruct'
-    #MISTRAL = 'mistral-large-instruct'
     GEMMA = 'gemma-3-27b-it'
     
 class Embedding(Enum):
@@ -167,7 +189,7 @@ def load_llm(llm_model, answer_level):
 
 def ask_question(index, ask_openai_llm):
   while True:
-      #\033[1m + \033[0m for bold text
+      #\033[1m + \033[0m for bold text in console
       query = input("\033[1m" + "Enter your question (or type 'q' to quit): " + "\033[0m").strip()
       if query.lower() == 'q':
           print("Session ended.")
