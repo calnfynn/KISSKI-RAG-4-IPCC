@@ -30,6 +30,10 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from openai import OpenAI
 from dotenv import load_dotenv
 from alive_progress import alive_bar
+from llama_index.core.schema import Node
+from bs4 import BeautifulSoup
+import glob
+import re
 
 
 #####
@@ -38,7 +42,7 @@ from alive_progress import alive_bar
 
 
 ID_prompt = """
-If you're taking information from the text to answer a question, pass back the ID of the paragraph(s) you're taking the information from.
+If you're taking information from the text to answer a question, pass back the chapter, (sub)heading and paragraph ID.
 """
 
 class Prompt(Enum):
@@ -93,6 +97,45 @@ bar_style = "fishes"
 #####
 
 
+def extract_subchapter_chunks(input_dir):
+    """
+    Returns: list of dicts:
+      {"content": full_text, "metadata": {"file": filename, "subchapter_id": id, ...}}
+    """
+    chunks = []
+    for html_file in glob.glob(os.path.join(input_dir, "*.html")):
+        file_name = os.path.basename(html_file)
+        with open(html_file, encoding="utf-8") as f:
+            soup = BeautifulSoup(f, "html.parser")
+            subchapter_paras = {}
+            for p in soup.find_all("p"):
+                pid = p.get("id")
+                text = p.get_text().strip()
+                if pid and text:
+                    match = re.match(r"([\d\.]+)_p\d+", pid)
+                    if match:
+                        subchapter_id = match.group(1)
+                        subchapter_paras.setdefault(subchapter_id, []).append(text)
+            # Now create chunks
+            for sub_id, texts in subchapter_paras.items():
+                chunks.append({
+                    "content": " ".join(texts),
+                    "metadata": {"file": file_name, "subchapter_id": sub_id}
+                })
+    return chunks
+
+
+def make_subchapter_nodes(input_dir):
+    chunks = extract_subchapter_chunks(input_dir)
+    nodes = []
+    for chunk in chunks:
+        node = Node(
+            text=chunk["content"],
+            metadata=chunk["metadata"],
+        )
+        nodes.append(node)
+    return nodes
+
 def make_index(index_dir, embed_model, force_rebuild):
 
     # Embed Chunks with HuggingFace
@@ -123,15 +166,17 @@ def make_index(index_dir, embed_model, force_rebuild):
         print(f"Loaded {len(documents)} document(s).")
 
         # Chunk with SentenceSplitter (progress bar per doc)
-        splitter = SentenceSplitter(chunk_size=tokens_per_chunk, chunk_overlap=chunk_overlap)
+        nodes = make_subchapter_nodes(input_dir)
+        print(f"Generated {len(nodes)} subchapter chunks.")
+        for c in nodes[:3]:  # print first 3
+            print(c)
+#        nodes = []
+#        with alive_bar(title="Generating chunks...", unknown=bar_style, spinner=None) as bar:
+#            for doc in documents:
+#                nodes.extend(splitter.get_nodes_from_documents([doc]))
+#                bar()
 
-        nodes = []
-        with alive_bar(title="Generating chunks...", unknown=bar_style, spinner=None) as bar:
-            for doc in documents:
-                nodes.extend(splitter.get_nodes_from_documents([doc]))
-                bar()
-
-        print(f"Generated {len(nodes)} chunks.")
+#        print(f"Generated {len(nodes)} chunks.")
 
         # Create Index
         faiss_index = faiss.IndexFlatL2(vector_dimensions)
@@ -210,6 +255,7 @@ def ask_question(index, ask_openai_llm):
       print("\nA:")
       print(answer)
       print("___\n")
+      print(context)
 
 #####
 # Starting point
