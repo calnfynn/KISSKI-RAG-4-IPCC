@@ -38,7 +38,7 @@ from alive_progress import alive_bar
 
 
 ID_prompt = """
-If you're taking information from the text to answer a question, pass back the ID of the paragraph(s) you're taking the information from in the form of a hyperlink.
+If you're taking information from the text to answer a question, pass back the ID of the paragraph(s) you're taking the information from.
 """
 
 class Prompt(Enum):

@@ -12,3 +12,5 @@ llama-index-llms-ollama
 
 
 alive-progress
+
+beautifulsoup4
