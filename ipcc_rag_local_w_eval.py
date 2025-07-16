@@ -204,6 +204,20 @@ def ask_question(index, ask_ollama_llm):
       log_rag_example(jsonl_filepath, query, answer, context, reference=None)
 
 #####
+# Log for Eval
+#####
+
+def log_rag_example(filepath, question, answer, retrieved_context, reference=None):
+    with open(filepath, "a", encoding="utf-8") as f:
+        f.write(json.dumps({
+            "question": question,
+            "generated_answer": answer,
+            "retrieved_context": retrieved_context,
+            "reference_answer": reference
+        }) + "\n")
+
+
+#####
 # Starting point
 #####
 
