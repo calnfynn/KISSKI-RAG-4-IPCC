@@ -10,7 +10,6 @@ llama-index-embeddings-huggingface
 llama-index-vector-stores-faiss 
 llama-index-llms-ollama
 
-
 alive-progress
 
 beautifulsoup4

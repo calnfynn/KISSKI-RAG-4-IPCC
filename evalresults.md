@@ -1,10 +1,8 @@
 # Evaluation scores
 
-```bash
+```sh
 (.venv) PS C:\Users\Fynn\Documents\KISSKI-RAG-4-IPCC> & C:/Users/Fynn/Documents/KISSKI-RAG-4-IPCC/.venv/Scripts/python.exe c:/Users/Fynn/Documents/KISSKI-RAG-4-IPCC/eval.py
 BERTScore:
-Some weights of RobertaModel were not initialized from the model checkpoint at roberta-large and are newly initialized: ['pooler.dense.bias', 'pooler.dense.weight']
-You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
   precision: 0.8069
   recall: 0.8527
   f1: 0.8291
@@ -16,7 +14,9 @@ Cosine Similarity:
   cosine_similarity: 0.7204
 ```
 
-| Metric              | What it Scores                    | Good Score | Bad Score | Our Score | Notes          |
+---
+
+| Metric              | What it Scores                    | Good Score | Bad Score | *Our Score* | Notes          |
 | -----------------   | --------------------------------- | ---------- | --------- | --------- | -------------- |
 | BERTScore Precision | Semantic precision                | >0.8       | <0.6      | 0.8069    | good (just so) |
 | BERTScore Recall    | Semantic recall                   | >0.8       | <0.6      | 0.8527    | good           |
@@ -26,7 +26,11 @@ Cosine Similarity:
 | ROUGE-L             | Longest matching sequence         | >0.3       | <0.1      | 0.1518    | not good       |
 | Cosine Similarity   | Embedding similarity (meaning)    | >0.7       | <0.5      | 0.7204    | good           |
 
-BERTScore & Cosine similarity test for semantic matches, 
+---
+
+All metrics can have values between 0 (worst) and 1 (best).
+
+BERTScore & Cosine Similarity test for semantic matches, 
 ROUGE tests for verbatim matches. 
 
 BERT & Cosine are more helpful for RAG evaluation.

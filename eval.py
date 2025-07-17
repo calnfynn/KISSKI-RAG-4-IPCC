@@ -1,12 +1,28 @@
-#####
-# Imports
-#####
+"""
+KISSKI RAG 4 IPCC — Copyright (c) 2025 ASKC Rahr
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the “Software”), to use,
+copy, modify, merge, and distribute the Software **for noncommercial purposes only**, 
+subject to the following conditions:
+
+1. **Attribution** must be retained in all copies or substantial portions of the Software.
+2. Commercial use of any kind is **explicitly forbidden** without prior written permission.
+   This includes, but is not limited to:
+   - use in or by for-profit companies
+   - integration into commercial services or products
+   - use by contractors or consultants for paid work
+
+The Software is provided "as is", without warranty of any kind.
+
+This license is derived from the MIT License with added restrictions to prohibit commercial use.
+"""
 
 import json
-from bert_score import score as bert_score      # For BERTScore (semantic similarity)
-from rouge_score import rouge_scorer            # For ROUGE (n-gram overlap metrics)
-from sentence_transformers import SentenceTransformer, util  # For cosine similarity
-import numpy as np                              # For array operations
+from bert_score import score as bert_score      
+from rouge_score import rouge_scorer            
+from sentence_transformers import SentenceTransformer, util  
+import numpy as np                              
 
 #####
 # Data Loading
@@ -86,7 +102,7 @@ def main(jsonl_path):
     print("BERTScore:")
     bert = evaluate_bertscore(generated, references)
     for k, v in bert.items():
-        print(f"  {k}: {v:.4f}")
+        print(f"  {k}: {v:.4f}") #.4f = display float with 4 decimals
 
     print("ROUGE:")
     rouge = evaluate_rouge(generated, references)
@@ -99,7 +115,7 @@ def main(jsonl_path):
         print(f"  {k}: {v:.4f}")
 
 #####
-# Entrypoint
+# Starting point
 #####
 
 if __name__ == "__main__":

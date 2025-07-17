@@ -200,8 +200,6 @@ def ask_question(index, ask_ollama_llm):
       print(answer)
       print("___\n")
 
-      answer=str(answer)
-      log_rag_example(jsonl_filepath, query, answer, context, reference=None)
 
 #####
 # Starting point
