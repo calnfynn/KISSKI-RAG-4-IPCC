@@ -145,7 +145,6 @@ def make_index(index_dir, embed_model, force_rebuild):
             )
             bar()
 
-
         # Save index
         index.storage_context.persist(persist_dir=index_dir)
         print(f"Index stored in {index_dir}")
@@ -200,13 +199,28 @@ def ask_question(index, ask_ollama_llm):
       print(answer)
       print("___\n")
 
+      answer = str(answer)
+      log_rag_example(jsonl_filepath, query, answer, context, reference=None)
+
+#####
+# Log for Eval
+#####
+
+def log_rag_example(filepath, question, answer, retrieved_context, reference=None):
+    with open(filepath, "a", encoding="utf-8") as f:
+        f.write(json.dumps({
+            "question": question,
+            "generated_answer": answer,
+            "retrieved_context": retrieved_context,
+            "reference_answer": reference
+        }) + "\n")
+
 
 #####
 # Starting point
 #####
 
 if __name__ == "__main__":
-
     index = make_index(index_dir, embed_model.value, force_rebuild)
     ask_ollama = load_llm(llm_model, answer_level.value)
     ask_question(index, ask_ollama)

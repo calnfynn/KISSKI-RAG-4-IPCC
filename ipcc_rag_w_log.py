@@ -30,7 +30,7 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from openai import OpenAI
 from dotenv import load_dotenv
 from alive_progress import alive_bar
-
+import json
 
 #####
 # Enums and variables
@@ -71,6 +71,7 @@ parser.add_argument("--tokens", type=int, default=1024, help="Tokens per chunk f
 parser.add_argument("--overlap", type=int, default=200, help="Token overlap between chunks (default: 200)")
 parser.add_argument("--rebuild", action="store_true", help="Force rebuilding the FAISS index even if one exists")
 
+jsonl_filepath = "txt/log.jsonl"
 
 args = parser.parse_args()
 
@@ -210,6 +211,22 @@ def ask_question(index, ask_openai_llm):
       print("\nA:")
       print(answer)
       print("___\n")
+
+      answer = str(answer)
+      log_rag_example(jsonl_filepath, query, answer, context, reference=None)
+
+#####
+# Log for Eval
+#####
+
+def log_rag_example(filepath, question, answer, retrieved_context, reference=None):
+    with open(filepath, "a", encoding="utf-8") as f:
+        f.write(json.dumps({
+            "question": question,
+            "generated_answer": answer,
+            "retrieved_context": retrieved_context,
+            "reference_answer": reference
+        }) + "\n")
 
 #####
 # Starting point
